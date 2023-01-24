@@ -2,20 +2,7 @@ import (
 	"list"
 	"strings"
 )
-
-#Settings: {
-	allow_empty_home: bool | *false
-	allow_debugger:   bool | *false
-
-	firejail_flags: [...string]
-    flags: [...string]
-    pre_flags: [...string]
-}
-
-_ProgramSettings: {
-	#Settings
-	executeable: string
-}
+// Generators
 
 #OverwritesInline: {
 	_src: _
@@ -51,19 +38,80 @@ _ProgramSettings: {
 	_src
 }
 
+// Schema
+
+#Settings: {
+	allow_debugger: bool | *false
+
+	firejail_flags: [...string]
+	flags: [...string]
+	pre_flags: [...string]
+
+	env?: [string]: string
+}
+
+_ProgramSettings: {
+	#Settings
+	executeable: string
+}
+
 #ProgramSettings: #Overwrites & {
 	_src: _ProgramSettings
 	_ignore: ["executeable"]
 }
 
-c0: #ProgramSettings & {
-	overwrites: {}
-
-	executeable: "c0"
+#HomeSettings: {
+	home:             string
+	allow_empty_home: bool | *false
 }
 
-c1: #ProgramSettings & {
-	overwrites: {}
+_SpaceSettings: {
+	#Settings
+	#HomeSettings
+}
 
-	executeable: "c1"
+#SpaceSettings: #Overwrites & {
+	_src: _SpaceSettings
+	_ignore: ["home"]
+}
+
+#GlobalSettings: {
+	#Settings
+	#HomeSettings
+}
+
+#ConfigFile: {
+	global?: #GlobalSettings
+
+	spaces?: #SpaceSettings
+
+	programms?: #ProgramSettings
+}
+
+// testing objects
+
+
+p0: #ProgramSettings & {
+	overwrites: {
+	}
+	executeable: "p0"
+
+	spaces?: [string]:#SpaceSettings
+
+}
+
+p1: #ProgramSettings & {
+
+	executeable: "p1"
+}
+
+s0: #SpaceSettings & {
+	overwrites: {}
+}
+
+s1: #SpaceSettings & {
+}
+
+c0: #ConfigFile & {
+	global: {}
 }
