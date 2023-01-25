@@ -53,6 +53,8 @@ import (
 _ProgramSettings: {
 	#Settings
 	executeable: string
+	spaces?: [string]: #SpaceSettings
+
 }
 
 #ProgramSettings: #Overwrites & {
@@ -83,7 +85,31 @@ _SpaceSettings: {
 #ConfigFile: {
 	global?: #GlobalSettings
 
-	spaces?: #SpaceSettings
+	spaces?: [string]: #SpaceSettings
+
+	programms?: [string]: #ProgramSettings
+}
+// validations
+#ConfigFile: programms?: [_program=string]: #ProgramSettings & {
+	executeable: _program | =~"/"
+}
+
+// in programms only allow space names that are allowed at the top level
+#ConfigFile: {
+	spaces?: _
+	#allowedSpaces: { // also works with closed hidden types; (performance?)
+		for k, _ in spaces {
+			"\(k)": true
+		}
+	}
+	programms?: [string]: {
+		spaces?: [_space=string]: {
+			_valid_space_name: #allowedSpaces & {
+				"\(_space)": true
+			}
+		}
+	}
+}
 
 	programms?: #ProgramSettings
 }
@@ -114,4 +140,18 @@ s1: #SpaceSettings & {
 
 c0: #ConfigFile & {
 	global: {}
+}
+
+c1: #ConfigFile & {
+	global: {}
+	spaces:{
+		valid:{}
+	}
+	programms:{
+		cat:{
+			spaces:{
+				valid:{}
+			}
+		}
+	}
 }
