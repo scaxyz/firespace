@@ -125,12 +125,40 @@ import (
 		}
 	}
 }
+// 
 
-	programms?: #ProgramSettings
+// compiler/merger
+
+#Compiler: {
+	in: #FireSpaceContext
+
+	_firejail: "/usr/bin/firejail"
+
+	_firejail_flags: *strings.Join(in.firejail_flags, " ") | []
+
+	_private: string
+
+	if in.home != "" {
+		_private: "--private=\(in.home)"
+}
+
+	if in.home == "" {
+		_private: ""
+	}
+
+	_parts: list.FlattenN([_firejail, _firejail_flags, _private, in.executeable, in.pre_flags], 1)
+
+	_filtered: [
+		for i, v in _parts
+		if v != "" {
+			v
+		},
+	]
+
+	out: _filtered
 }
 
 // testing objects
-
 
 p0: #ProgramSettings & {
 	overwrites: {
@@ -171,4 +199,20 @@ c1: #ConfigFile & {
 	}
 }
 
-f0: #FireSpaceContext & {}
+f0: #FireSpaceContext & {
+	executeable: "some-bin"
+	home:        "some/home"
+	firejail_flags: ["--ignore=something"]
+	pre_flags: ["--pre-flag"]
+}
+
+f1: #FireSpaceContext & {
+	executeable: "some-bin"
+	//home:        "some/home"
+	allow_empty_home: true
+	firejail_flags: ["--ignore=something"]
+}
+
+cmd0: #Compiler & {in: f0}
+
+cmd1: #Compiler & {in: f1}
