@@ -50,16 +50,22 @@ import (
 	env?: [string]: string
 }
 
-_ProgramSettings: {
+#HasSpaces: {
+	spaces?: [string]: #SpaceSettings
+}
+
+#ProgramOnlySettings: {
 	#Settings
 	executeable: string
-	spaces?: [string]: #SpaceSettings
-
 }
 
 #ProgramSettings: #Overwrites & {
-	_src: _ProgramSettings
-	_ignore: ["executeable"]
+	_src: {
+		#ProgramOnlySettings
+		#HasSpaces
+	}
+	_ignore: ["executeable", "spaces"]
+
 }
 
 #HomeSettings: {
@@ -67,13 +73,13 @@ _ProgramSettings: {
 	allow_empty_home: bool | *false
 }
 
-_SpaceSettings: {
+#SpaceOnlySettings: {
 	#Settings
 	#HomeSettings
 }
 
 #SpaceSettings: #Overwrites & {
-	_src: _SpaceSettings
+	_src: #SpaceOnlySettings
 	_ignore: ["home"]
 }
 
@@ -85,10 +91,16 @@ _SpaceSettings: {
 #ConfigFile: {
 	global?: #GlobalSettings
 
-	spaces?: [string]: #SpaceSettings
+	#HasSpaces
 
 	programms?: [string]: #ProgramSettings
 }
+
+#FireSpaceContext: {
+	#SpaceOnlySettings
+	#ProgramOnlySettings
+}
+
 // validations
 #ConfigFile: programms?: [_program=string]: #ProgramSettings & {
 	executeable: _program | =~"/"
@@ -155,3 +167,5 @@ c1: #ConfigFile & {
 		}
 	}
 }
+
+f0: #FireSpaceContext & {}
