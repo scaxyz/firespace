@@ -1,7 +1,10 @@
+package firespace
+
 import (
 	"list"
 	"strings"
 )
+
 // Generators
 
 #OverwritesInline: {
