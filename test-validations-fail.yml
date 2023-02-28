@@ -1,0 +1,36 @@
+global:
+  env:
+
+
+spaces:
+  user:
+    home: ""
+    allow_empty_home: false
+    env:
+ 
+  user2:
+    home: "/home/user2"
+    before: []
+    after: []
+    env:
+
+programms:
+  cat:
+    firejail_flags: ["--flag1"]
+    flags: ["--test"]
+    pre_flags: ["--pre-flag"]
+    executeable: "/usr/bin/cat"
+    env:
+    spaces:
+      user:
+        env:
+          PROXY: "socks://some.host.com:1234"
+
+  bat:
+    env:
+      PROXY: "socks..."
+    
+
+  btop:
+    executeable: "htop"
+
