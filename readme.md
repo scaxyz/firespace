@@ -1,6 +1,20 @@
 # Firespace
 Workspace/Profiles for firejail
 
-e.g.
+e.g.  
 
-`firespace working firefox` => `/usr/bin/firejail --private=/some/path/working firefox --no-remote http://duckduckgo.com/?q=firejail`
+`config.yaml`
+```yaml
+spaces:
+  working:
+    home: "/some/path/working"
+
+
+programms:
+  firefox:
+    flags:
+      - "--no-remote"
+      - "https://duckduckgo.com/?q=firejail"
+```
+
+`firespace working firefox` => `/usr/bin/firejail --private=/some/path/working firefox --no-remote https://duckduckgo.com/?q=firejail`
