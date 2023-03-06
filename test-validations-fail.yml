@@ -1,15 +1,19 @@
 global:
   env:
-
+    HTTP_PROXY: "socks5://proxy"
+    HTTPS_PROXY: "socks5://proxy"
+    PROXY: "socks5://proxy"
 
 spaces:
   user:
     home: ""
     allow_empty_home: false
+    no_private: false
     env:
  
   user2:
     home: "/home/user2"
+    no_private: true
     before: []
     after: []
     env:

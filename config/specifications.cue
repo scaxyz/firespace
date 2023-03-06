@@ -12,6 +12,7 @@ package firespace2
 
 #CanControllHome:{
 	allow_empty_home: bool | *false
+	no_private: bool | *false
 }
 
 #HasOverwrites:{
@@ -26,10 +27,8 @@ package firespace2
 	#HasENV
 	before: [...string]
 	after: [...string]
-
+	allow_debugger: bool |*false
 	firejail_flags: [...string]
-
-
 }
 
 

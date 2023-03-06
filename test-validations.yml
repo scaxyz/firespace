@@ -1,6 +1,11 @@
 global:
-  env: null
+  env:
+    HTTP_PROXY: "socks5://proxy"
+    HTTPS_PROXY: "socks5://proxy"
+    PROXY: "socks5://proxy"
+
   before: ["echo starting"]
+  after: ["env-test {{.OS.Env.USER}}"]
 
 
 spaces:

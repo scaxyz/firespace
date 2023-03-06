@@ -20,6 +20,11 @@ package firespace2
 			home: #AbsPath
 		}
 
+		if home != "" {
+			no_private: false
+		}
+
 	}
 
 }
+

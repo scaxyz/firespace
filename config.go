@@ -17,10 +17,20 @@ type CanSetHome struct {
 
 type CanControllHome struct {
 	AllowEmptyHome bool `yaml:"allow_empty_home"`
+	NoPrivate      bool `yaml:"no_private"`
 }
 
 type HasOverwrites struct {
-	Overwrites map[string]bool
+	Overwrites Overwrites
+}
+
+type Overwrites struct {
+	Env           bool
+	Before        bool
+	After         bool
+	FirejailFlags bool
+	PreFlags      bool
+	Flags         bool
 }
 
 type GlobalSettings struct {
