@@ -59,9 +59,17 @@ type ProgramSettings struct {
 
 type CommonSettings struct {
 	HasEnv        `yaml:",inline"`
-	Before        []string
-	After         []string
+	Before        []ExtendedShellCommand
+	After         ShellCommands
 	FirejailFlags []string `yaml:"firejail_flags"`
+}
+
+type ShellCommand string
+type ShellCommands []string
+
+type ExtendedShellCommand struct {
+	Command    string
+	AllowError bool `yaml:"allow_error"`
 }
 
 type AddionalSpacesSettings struct {

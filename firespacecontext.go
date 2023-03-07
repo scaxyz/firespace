@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"text/template"
 
+	"github.com/google/shlex"
+	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
 )
 
@@ -215,6 +218,14 @@ func getOsEnvMap() map[string]string {
 	return envMap
 }
 
+func envMapToSlice(strMap map[string]string) []string {
+	envSlice := []string{}
+	for k, v := range strMap {
+		envSlice = append(envSlice, fmt.Sprint(k, "=", v))
+	}
+	return envSlice
+}
+
 func (space FirespaceContext) ExecuteTemplates() *FirespaceContext {
 
 	templateContext := TemplateContext{
@@ -233,12 +244,115 @@ func (space FirespaceContext) ExecuteTemplates() *FirespaceContext {
 	newSpace := FirespaceContext{
 		CommonSettings: CommonSettings{
 			HasEnv: HasEnv{Env: executeTemplateOnMap(space.Env, templateContext)},
-			Before: executeTemplateOnSlice(space.Before, templateContext),
-			After:  executeTemplateOnSlice(space.After, templateContext),
+			Before: executeTemplateOnExtendetShellCommand(space.Before, templateContext),
+			After:  executeTemplateOnStringSlice(space.After, templateContext),
 		},
+		CanControllHome: space.CanControllHome,
+		CanSetHome: CanSetHome{
+			Home: space.CanSetHome.Home,
+		},
+		HasOverwrites: space.HasOverwrites,
+		Executeable:   space.Executeable,
+		PreFlags:      executeTemplateOnStringSlice(space.PreFlags, templateContext),
+		Flags:         executeTemplateOnStringSlice(space.Flags, templateContext),
 	}
 
 	return &newSpace
+}
+
+func (space FirespaceContext) Start(cliArgs []string, dry bool) (err error) {
+	defer func() {
+		rec := recover()
+		if iErr, ok := rec.(error); ok {
+			err = iErr
+		}
+	}()
+	space.runBeforeCommands(dry)
+
+	cmd := space.BuildFirejailCommand(cliArgs)
+
+	defer func() {
+		space.runAfterCommands(dry)
+	}()
+
+	err = runShell(cmd, dry)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (space FirespaceContext) BuildFirejailArgs(cliArgs []string) []string {
+
+	args := []string{}
+
+	if space.Home != "" {
+		args = append(args, fmt.Sprint("--private=", space.Home))
+	}
+	if space.Home == "" && space.NoPrivate == false {
+		args = append(args, "--private")
+	}
+
+	args = append(args, space.FirejailFlags...)
+
+	args = append(args, space.Executeable)
+
+	args = append(args, space.PreFlags...)
+
+	args = append(args, cliArgs...)
+
+	args = append(args, space.Flags...)
+
+	return args
+}
+
+func (space FirespaceContext) BuildFirejailCommand(cliArgs []string) *exec.Cmd {
+
+	args := space.BuildFirejailArgs(cliArgs)
+
+	cmd := exec.Command("firejail", args...)
+	cmd.Env = envMapToSlice(space.Env)
+
+	return cmd
+
+}
+
+func (space FirespaceContext) runBeforeCommands(dry bool) {
+	for _, beforeCommand := range space.Before {
+		fields, err := shlex.Split(beforeCommand.Command)
+		if err != nil {
+			sugar.Panic("parsing before command", zap.Error(err))
+		}
+
+		cmd := exec.Command(fields[0], fields[1:]...)
+		cmd.Env = envMapToSlice(space.Env)
+
+		err = runShell(cmd, dry)
+		if err != nil {
+			if !beforeCommand.AllowError {
+				sugar.Panic("running before command", zap.Error(err), zap.String("command", beforeCommand.Command))
+			}
+		}
+	}
+}
+
+func (space FirespaceContext) runAfterCommands(dry bool) {
+	for _, command := range space.After {
+		fields, err := shlex.Split(command)
+		if err != nil {
+			sugar.Panic("parsing after command", zap.Error(err))
+		}
+
+		cmd := exec.Command(fields[0], fields[1:]...)
+		cmd.Env = envMapToSlice(space.Env)
+
+		err = runShell(cmd, dry)
+		if err != nil {
+			sugar.Errorw("running after command", zap.Error(err), zap.String("command", command))
+		}
+	}
 }
 
 func executeTemplateOnMap[Key comparable](stringMap map[Key]string, data interface{}) map[Key]string {
@@ -250,14 +364,14 @@ func executeTemplateOnMap[Key comparable](stringMap map[Key]string, data interfa
 		tmplte := template.New(fmt.Sprintf("%v", k))
 		tmplte, err := tmplte.Parse(v)
 		if err != nil {
-			panic(err)
+			sugar.Panicw("parsing template", zap.Error(err))
 		}
 
 		buf := buffer.Buffer{}
 
 		err = tmplte.Execute(&buf, data)
 		if err != nil {
-			panic(err)
+			sugar.Panicw("executing template", zap.Error(err))
 		}
 
 		newMap[k] = buf.String()
@@ -267,7 +381,7 @@ func executeTemplateOnMap[Key comparable](stringMap map[Key]string, data interfa
 
 }
 
-func executeTemplateOnSlice(stringSlice []string, data interface{}) []string {
+func executeTemplateOnStringSlice(stringSlice []string, data interface{}) []string {
 
 	newSlice := make([]string, len(stringSlice))
 
@@ -276,14 +390,14 @@ func executeTemplateOnSlice(stringSlice []string, data interface{}) []string {
 		tmplte := template.New(fmt.Sprintf("%v", k))
 		tmplte, err := tmplte.Parse(v)
 		if err != nil {
-			panic(err)
+			sugar.Panicw("parsing template", zap.Error(err))
 		}
 
 		buf := bytes.Buffer{}
 
 		err = tmplte.Execute(&buf, data)
 		if err != nil {
-			panic(err)
+			sugar.Panicw("executing template", zap.Error(err))
 		}
 
 		newSlice[k] = buf.String()
@@ -291,4 +405,45 @@ func executeTemplateOnSlice(stringSlice []string, data interface{}) []string {
 	}
 	return newSlice
 
+}
+
+func executeTemplateOnExtendetShellCommand(cmds []ExtendedShellCommand, data interface{}) []ExtendedShellCommand {
+
+	newSlice := make([]ExtendedShellCommand, len(cmds))
+
+	for k, v := range cmds {
+
+		tmplte := template.New(fmt.Sprintf("%v", k))
+		tmplte, err := tmplte.Parse(v.Command)
+		if err != nil {
+			sugar.Panicw("parsing template", zap.Error(err))
+		}
+
+		buf := bytes.Buffer{}
+
+		err = tmplte.Execute(&buf, data)
+		if err != nil {
+			sugar.Panicw("executing template", zap.Error(err))
+		}
+
+		newSlice[k].Command = buf.String()
+
+	}
+	return newSlice
+
+}
+
+func runShell(cmd *exec.Cmd, dry bool) error {
+
+	if dry {
+		return runShellDry(cmd)
+	}
+
+	return fmt.Errorf("not implemented")
+}
+
+func runShellDry(cmd *exec.Cmd) error {
+
+	sugar.Infow("running cmd", zap.String("cmd", cmd.String()))
+	return nil
 }

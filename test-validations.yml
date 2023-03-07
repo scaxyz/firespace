@@ -4,7 +4,9 @@ global:
     HTTPS_PROXY: "socks5://proxy"
     PROXY: "socks5://proxy"
 
-  before: ["echo starting"]
+  before: [{
+    command: "echo 'some before command'"
+  }]
   after: ["env-test {{.OS.Env.USER}}"]
 
 
@@ -16,6 +18,9 @@ spaces:
  
   user2:
     home: "/home/user2"
+    overwrites:
+      before: true
+      after: true
     before: []
     after: []
     env: null

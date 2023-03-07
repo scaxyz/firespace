@@ -23,10 +23,17 @@ package firespace2
 	#CommonSettings
 }
 
+#ShellCommand: string
+
+#ExtendetShellCommand:{
+	command: #ShellCommand
+	allow_error: bool | *false
+}
+
 #CommonSettings: {
 	#HasENV
-	before: [...string]
-	after: [...string]
+	before: [...#ExtendetShellCommand]
+	after: [...#ShellCommand]
 	allow_debugger: bool |*false
 	firejail_flags: [...string]
 }
