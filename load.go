@@ -1,59 +1,70 @@
 package firespace
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
+	"cuelang.org/go/encoding/gocode/gocodec"
 	cueyaml "cuelang.org/go/encoding/yaml"
-
-	yaml "github.com/goccy/go-yaml"
 
 	"go.uber.org/zap"
 )
 
 func LoadYamlConfig(yamlPath string) (*ConfigFile, error) {
 
-	yamlData, err := ioutil.ReadFile(yamlPath)
+	yamlData, err := os.ReadFile(yamlPath)
 	if err != nil {
 		sugar.Errorw("reading yaml config", zap.String("path", yamlPath), zap.Error(err))
 		return nil, err
 	}
 
-	cueValue, err := loadCueConfigValue()
+	cctx := cuecontext.New()
+
+	cueValue, err := loadCueConfigValue(cctx)
 	if err != nil {
-		sugar.Errorw("loading cue contig value", zap.Error(err))
+		sugar.Errorw("loading cue config value", zap.Error(err))
 		return nil, err
 	}
 
-	err = validateYamlString(string(yamlData), cueValue)
+	i, err := cueyaml.Decode((*cue.Runtime)(cctx), "config.yaml", yamlData)
 	if err != nil {
-		sugar.Errorw("validation src-yaml vs cue", zap.Error(err))
+		sugar.Errorw("decoding yaml to cue value", zap.Error(err))
 		return nil, err
 	}
+	ymlValue := i.Value()
+
+	configFileValue := cueValue.LookupPath(cue.ParsePath("#ConfigFile"))
+
+	err = configFileValue.Err()
+	if err != nil {
+		sugar.Errorw("looging up cue value", zap.Error(err), zap.String("details", errors.Details(err, nil)))
+		return nil, err
+	}
+
+	unifiedConfig := configFileValue.Unify(ymlValue)
+	err = unifiedConfig.Err()
+	if err != nil {
+		sugar.Errorw("unifying cue schema and yaml config", zap.Error(err), zap.String("details", errors.Details(err, nil)))
+		return nil, err
+	}
+
+	cueCodec := gocodec.New((*cue.Runtime)(cctx), nil)
 
 	configFile := ConfigFile{}
 
-	err = yaml.Unmarshal(yamlData, &configFile)
+	err = cueCodec.Validate(unifiedConfig, &configFile)
 
 	if err != nil {
-		sugar.Errorw("unmarshaling yaml config file", zap.Error(err))
+		sugar.Errorw("validating go struct", zap.Error(err), zap.String("details", errors.Details(err, nil)))
 		return nil, err
 	}
 
-	remarshaledYAML, err := yaml.Marshal(&configFile)
-
+	err = cueCodec.Complete(unifiedConfig, &configFile)
 	if err != nil {
-		sugar.Errorw("marshaling struct  to yaml", zap.Error(err))
-		return nil, err
-	}
-
-	err = validateYamlString(string(remarshaledYAML), cueValue)
-
-	if err != nil {
-		sugar.Errorw("validating re-marshaled via cue", zap.Error(err))
+		sugar.Errorw("completing go struct", zap.Error(err), zap.String("details", errors.Details(err, nil)))
 		return nil, err
 	}
 
@@ -61,7 +72,7 @@ func LoadYamlConfig(yamlPath string) (*ConfigFile, error) {
 
 }
 
-func loadCueConfigValue() (*cue.Value, error) {
+func loadCueConfigValue(cctx *cue.Context) (*cue.Value, error) {
 
 	c, err := CueFiles.ReadDir("config")
 	if err != nil {
@@ -69,7 +80,6 @@ func loadCueConfigValue() (*cue.Value, error) {
 		return nil, err
 	}
 
-	cctx := cuecontext.New()
 	var valueNow cue.Value
 	first := true
 
@@ -103,18 +113,4 @@ func loadCueConfigValue() (*cue.Value, error) {
 	}
 
 	return &valueNow, nil
-}
-
-func validateYamlString(yamlData string, cueValue *cue.Value) error {
-
-	err := cueValue.Validate(cue.Optional(true), cue.All())
-	if err != nil {
-		sugar.Errorw("validating cue", zap.Error(err))
-		return err
-	}
-
-	cf := cueValue.LookupPath(cue.ParsePath("#ConfigFile"))
-
-	return cueyaml.Validate([]byte(yamlData), cf)
-
 }

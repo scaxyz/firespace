@@ -1,27 +1,27 @@
 package firespace
 
 type ConfigFile struct {
-	Global    GlobalSettings             `yaml:"global"`
-	Spaces    map[string]SpaceSettings   `yaml:"spaces"`
-	Programms map[string]ProgramSettings `yaml:"programms"`
+	Global    GlobalSettings             `json:"global"`
+	Spaces    map[string]SpaceSettings   `json:"spaces"`
+	Programms map[string]ProgramSettings `json:"programms"`
 }
 type Env map[string]string
 
 type HasEnv struct {
-	Env Env
+	Env Env `json:"env"`
 }
 
 type CanSetHome struct {
-	Home string
+	Home string `json:"home"`
 }
 
 type CanControllHome struct {
-	AllowEmptyHome bool `yaml:"allow_empty_home"`
-	NoPrivate      bool `yaml:"no_private"`
+	AllowEmptyHome bool `json:"allow_empty_home"`
+	NoPrivate      bool `json:"no_private"`
 }
 
 type HasOverwrites struct {
-	Overwrites Overwrites
+	Overwrites Overwrites `json:"overwrites"`
 }
 
 type Overwrites struct {
@@ -34,44 +34,44 @@ type Overwrites struct {
 }
 
 type GlobalSettings struct {
-	CommonSettings `yaml:",inline"`
+	CommonSettings `json:",inline"`
 }
 
 type SpaceSettings struct {
-	CommonSpaceSettings `yaml:",inline"`
-	CanControllHome     `yaml:",inline"`
-	CanSetHome          `yaml:",inline"`
+	CommonSpaceSettings `json:",inline"`
+	CanControllHome     `json:",inline"`
+	CanSetHome          `json:",inline"`
 }
 
 type CommonSpaceSettings struct {
-	CommonSettings `yaml:",inline"`
-	HasOverwrites  `yaml:",inline"`
+	CommonSettings `json:",inline"`
+	HasOverwrites  `json:",inline"`
 }
 
 type ProgramSettings struct {
-	CommonSettings `yaml:",inline"`
-	HasOverwrites  `yaml:",inline"`
-	Spaces         map[string]AddionalSpacesSettings
-	Executeable    string
-	PreFlags       []string `yaml:"pre_flags"`
-	Flags          []string
+	CommonSettings `json:",inline"`
+	HasOverwrites  `json:",inline"`
+	Spaces         map[string]AddionalSpacesSettings `json:"spaces"`
+	Executeable    string                            `json:"executeable,omitempty"`
+	PreFlags       []string                          `json:"pre_flags"`
+	Flags          []string                          `json:"flags"`
 }
 
 type CommonSettings struct {
-	HasEnv        `yaml:",inline"`
-	Before        []ExtendedShellCommand
-	After         ShellCommands
-	FirejailFlags []string `yaml:"firejail_flags"`
+	HasEnv        `json:",inline"`
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
 }
 
 type ShellCommand string
 type ShellCommands []string
 
 type ExtendedShellCommand struct {
-	Command    string
-	AllowError bool `yaml:"allow_error"`
+	Command    string `json:"command"`
+	AllowError bool   `json:"allow_error"`
 }
 
 type AddionalSpacesSettings struct {
-	CommonSpaceSettings `yaml:",inline"`
+	CommonSpaceSettings `json:",inline"`
 }
