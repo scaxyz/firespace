@@ -243,9 +243,10 @@ func (space FirespaceContext) ExecuteTemplates() *FirespaceContext {
 
 	newSpace := FirespaceContext{
 		CommonSettings: CommonSettings{
-			HasEnv: HasEnv{Env: executeTemplateOnMap(space.Env, templateContext)},
-			Before: executeTemplateOnExtendetShellCommand(space.Before, templateContext),
-			After:  executeTemplateOnStringSlice(space.After, templateContext),
+			HasEnv:        HasEnv{Env: executeTemplateOnMap(space.Env, templateContext)},
+			Before:        executeTemplateOnExtendetShellCommand(space.Before, templateContext),
+			After:         executeTemplateOnStringSlice(space.After, templateContext),
+			FirejailFlags: executeTemplateOnStringSlice(space.FirejailFlags, templateContext),
 		},
 		CanControllHome: space.CanControllHome,
 		CanSetHome: CanSetHome{
