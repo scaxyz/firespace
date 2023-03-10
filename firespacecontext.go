@@ -439,7 +439,12 @@ func runShell(cmd *exec.Cmd, dry bool) error {
 		return runShellDry(cmd)
 	}
 
-	return fmt.Errorf("not implemented")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	return err
 }
 
 func runShellDry(cmd *exec.Cmd) error {
