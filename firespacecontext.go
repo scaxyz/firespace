@@ -314,7 +314,8 @@ func (space FirespaceContext) BuildFirejailCommand(cliArgs []string) *exec.Cmd {
 	args := space.BuildFirejailArgs(cliArgs)
 
 	cmd := exec.Command("firejail", args...)
-	cmd.Env = envMapToSlice(space.Env)
+
+	cmd.Env = append(os.Environ(), envMapToSlice(space.Env)...)
 
 	return cmd
 
@@ -328,7 +329,7 @@ func (space FirespaceContext) runBeforeCommands(dry bool) {
 		}
 
 		cmd := exec.Command(fields[0], fields[1:]...)
-		cmd.Env = envMapToSlice(space.Env)
+		cmd.Env = append(os.Environ(), envMapToSlice(space.Env)...)
 
 		err = runShell(cmd, dry)
 		if err != nil {
@@ -347,7 +348,7 @@ func (space FirespaceContext) runAfterCommands(dry bool) {
 		}
 
 		cmd := exec.Command(fields[0], fields[1:]...)
-		cmd.Env = envMapToSlice(space.Env)
+		cmd.Env = append(os.Environ(), envMapToSlice(space.Env)...)
 
 		err = runShell(cmd, dry)
 		if err != nil {
