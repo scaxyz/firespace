@@ -28,3 +28,8 @@ package firespace2
 
 }
 
+#CommonSettings: {
+	_#Flag: =~ "^--"
+	firejail_flags: [..._#Flag]
+}
+
