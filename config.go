@@ -34,31 +34,87 @@ type Overwrites struct {
 }
 
 type GlobalSettings struct {
-	CommonSettings `json:",inline"`
+	/*
+		#CommonSettings
+	*/
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	Env Env `json:"env"`
 }
 
 type SpaceSettings struct {
-	CommonSpaceSettings `json:",inline"`
-	CanControllHome     `json:",inline"`
-	CanSetHome          `json:",inline"`
+	/// CommonSettings `json:",inline"
+	HasEnv        `json:",inline"`
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// HasOverwrites   `json:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
+
+	// CanControllHome `json:",inline"`
+	AllowEmptyHome bool `json:"allow_empty_home"`
+	NoPrivate      bool `json:"no_private"`
+
+	// CanSetHome      `json:",inline"`
+	Home string `json:"home"`
 }
 
 type CommonSpaceSettings struct {
-	CommonSettings `json:",inline"`
-	HasOverwrites  `json:",inline"`
+	// CommonSettings `json:",inline"`
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// HasOverwrites  `json:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
 }
 
 type ProgramSettings struct {
-	CommonSettings `json:",inline"`
-	HasOverwrites  `json:",inline"`
-	Spaces         map[string]AddionalSpacesSettings `json:"spaces"`
-	Executeable    string                            `json:"executeable,omitempty"`
-	PreFlags       []string                          `json:"pre_flags"`
-	Flags          []string                          `json:"flags"`
+	// CommonProgramSettings `json:",inline"`
+	// CommonSettings `json:",inline"`
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// HasOverwrites  `json:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
+
+	PreFlags []string `json:"pre_flags"`
+	Flags    []string `json:"flags"`
+
+	Spaces      map[string]AdditionalSpaceSettings `json:"spaces"`
+	Executeable string                             `json:"executeable,omitempty"`
+}
+
+type CommonProgramSettings struct {
+	// CommonSettings `json:",inline"`
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// HasOverwrites  `json:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
+
+	PreFlags []string `json:"pre_flags"`
+	Flags    []string `json:"flags"`
 }
 
 type CommonSettings struct {
-	HasEnv        `json:",inline"`
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
 	Before        []ExtendedShellCommand `json:"before,omitempty"`
 	After         ShellCommands          `json:"after,omitempty"`
 	FirejailFlags []string               `json:"firejail_flags"`
@@ -72,6 +128,21 @@ type ExtendedShellCommand struct {
 	AllowError bool   `json:"allow_error"`
 }
 
-type AddionalSpacesSettings struct {
-	CommonSpaceSettings `json:",inline"`
+type AdditionalSpaceSettings struct {
+	// CommonSpaceSettings   `json:",inline"`
+	// CommonSettings `json:",inline"`
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// HasOverwrites `json:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
+
+	//CommonProgramSettings `json:",inline"`
+
+	PreFlags []string `json:"pre_flags"`
+	Flags    []string `json:"flags"`
 }

@@ -1,56 +1,15 @@
 package firespace2
 
-#ENV: [string]: string
+#ConfigFile: {
+	global?: #GlobalSettings
 
-#HasENV: {
-	env?: #ENV | null
-}
+	spaces?: [string]: #SpaceSettings
 
-#CanSetHome:{
-	home: string
-}
-
-#CanControllHome:{
-	allow_empty_home: bool | *false
-	no_private: bool | *false
-}
-
-#HasOverwrites:{
-	overwrites: [string]: bool
+	programms?: [string]: #ProgramSettings
 }
 
 #GlobalSettings: {
 	#CommonSettings
-}
-
-#ShellCommand: string
-
-#ExtendetShellCommand:{
-	command: #ShellCommand
-	allow_error: bool | *false
-}
-
-#CommonSettings: {
-	#HasENV
-	before: [...#ExtendetShellCommand]
-	after: [...#ShellCommand]
-	allow_debugger: bool |*false
-	firejail_flags: [...string]
-}
-
-
-#ProgramSettings: {
-	#CommonSettings
-
-	#HasOverwrites
-
-	spaces: [string]: #AdditionalSpaceSettings
-
-	executeable: string
-
-	pre_flags: [...string]
-	flags: [...string]
-
 }
 
 #SpaceSettings: {
@@ -59,27 +18,10 @@ package firespace2
 	#CanSetHome
 }
 
-#CommonSpaceSettings:{
-	#CommonSettings
-	#HasOverwrites
-	
-}
-
-#AdditionalSpaceSettings:{
-	#CommonSpaceSettings
-}
-
-
-#HasAddionalSpacesSettings:{
+#ProgramSettings: {
+	#CommonProgramSettings
 	spaces: [string]: #AdditionalSpaceSettings
-}
-
-#ConfigFile: {
-	global?: #GlobalSettings
-
-	spaces: [string]: #SpaceSettings
-
-	programms?: [string]: #ProgramSettings
+	executeable: string
 }
 
 
@@ -90,3 +32,69 @@ package firespace2
 	#CanSetHome
 	#ProgramSettings
 }
+
+#CommonSettings: {
+	#HasENV
+	before: [...#ExtendetShellCommand]
+	after: [...#ShellCommand]
+	allow_debugger: bool |*false
+	firejail_flags: [...string]
+}
+
+#CommonProgramSettings:{
+	#CommonSettings
+
+	#HasOverwrites
+
+	pre_flags: [...string]
+	flags: [...string]
+}
+
+#CommonSpaceSettings:{
+	#CommonSettings
+	#HasOverwrites
+	
+}
+
+#AdditionalSpaceSettings:{
+	#CommonSpaceSettings
+	#CommonProgramSettings
+}
+
+#HasENV: {
+	env?: #ENV | null
+}
+
+#ENV: [string]: string
+
+
+#CanSetHome:{
+	home: string
+}
+
+#CanControllHome:{
+	allow_empty_home: bool | *false
+	no_private: bool | *false
+}
+
+
+#HasOverwrites:{
+	overwrites: [string]: bool
+}
+
+#HasAddionalSpacesSettings:{
+	spaces: [string]: #AdditionalSpaceSettings
+}
+
+
+#ExtendetShellCommand:{
+	command: #ShellCommand
+	allow_error: bool | *false
+}
+
+#ShellCommand: string
+
+
+
+
+

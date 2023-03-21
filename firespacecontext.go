@@ -14,19 +14,37 @@ import (
 )
 
 type FirespaceContext struct {
-	CommonSettings
-	CanControllHome
-	CanSetHome
-	HasOverwrites `yaml:",inline"`
-	Executeable   string
-	PreFlags      []string `yaml:"pre_flags"`
-	Flags         []string
+	// CommonSettings
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
+	Before        []ExtendedShellCommand `json:"before,omitempty"`
+	After         ShellCommands          `json:"after,omitempty"`
+	FirejailFlags []string               `json:"firejail_flags"`
+
+	// CanControllHome
+	AllowEmptyHome bool `json:"allow_empty_home"`
+	NoPrivate      bool `json:"no_private"`
+
+	// CanSetHome
+	Home string `json:"home"`
+
+	// HasOverwrites `yaml:",inline"`
+	Overwrites Overwrites `json:"overwrites"`
+
+	Executeable string
+	PreFlags    []string `yaml:"pre_flags"`
+	Flags       []string
 }
 
 func NewFirespaceFromConfig(config *ConfigFile, space string, program string) *FirespaceContext {
 
 	fromGlobal := &FirespaceContext{
-		CommonSettings: config.Global.CommonSettings,
+		//CommonSettings: config.Global.CommonSettings,
+		Before:        config.Global.Before,
+		After:         config.Global.After,
+		FirejailFlags: config.Global.FirejailFlags,
+		Env:           config.Global.Env,
 	}
 
 	fromSpace := newFirespaceFromSpace(config, space)
@@ -63,21 +81,17 @@ func Merge(base *FirespaceContext, updates *FirespaceContext) *FirespaceContext 
 	}
 
 	m := FirespaceContext{
-		CommonSettings: CommonSettings{
-			HasEnv: HasEnv{
-				Env: mergeOrReplaceMap(base.Env, updates.Env, updates.Overwrites.Env),
-			},
-			Before:        mergeSliceOrOverwrite(base.Before, updates.Before, updates.Overwrites.Before),
-			After:         mergeSliceOrOverwrite(base.After, updates.After, updates.Overwrites.After),
-			FirejailFlags: mergeSliceOrOverwrite(base.FirejailFlags, updates.FirejailFlags, updates.Overwrites.FirejailFlags),
-		},
-		CanControllHome: CanControllHome{
-			AllowEmptyHome: base.AllowEmptyHome || updates.AllowEmptyHome,
-			NoPrivate:      base.NoPrivate || updates.NoPrivate,
-		},
-		CanSetHome: CanSetHome{
-			Home: updateIfNotEmpty(base.Home, updates.Home),
-		},
+		Env: mergeOrReplaceMap(base.Env, updates.Env, updates.Overwrites.Env),
+
+		Before:        mergeSliceOrOverwrite(base.Before, updates.Before, updates.Overwrites.Before),
+		After:         mergeSliceOrOverwrite(base.After, updates.After, updates.Overwrites.After),
+		FirejailFlags: mergeSliceOrOverwrite(base.FirejailFlags, updates.FirejailFlags, updates.Overwrites.FirejailFlags),
+
+		AllowEmptyHome: base.AllowEmptyHome || updates.AllowEmptyHome,
+		NoPrivate:      base.NoPrivate || updates.NoPrivate,
+
+		Home: updateIfNotEmpty(base.Home, updates.Home),
+
 		Executeable: updateIfNotEmpty(base.Executeable, updates.Executeable),
 		PreFlags:    mergeSliceOrOverwrite(base.PreFlags, updates.PreFlags, updates.Overwrites.PreFlags),
 		Flags:       mergeSliceOrOverwrite(base.Flags, updates.Flags, updates.Overwrites.Flags),
@@ -137,10 +151,21 @@ func newFirespaceFromSpace(config *ConfigFile, space string) *FirespaceContext {
 	}
 
 	return &FirespaceContext{
-		CommonSettings:  spaceSettings.CommonSettings,
-		CanControllHome: spaceSettings.CanControllHome,
-		CanSetHome:      spaceSettings.CanSetHome,
-		HasOverwrites:   spaceSettings.HasOverwrites,
+		// CommonSettings:  spaceSettings.CommonSettings,
+		Env:           spaceSettings.Env,
+		Before:        spaceSettings.Before,
+		After:         spaceSettings.After,
+		FirejailFlags: spaceSettings.FirejailFlags,
+
+		// CanControllHome: spaceSettings.CanControllHome,
+		AllowEmptyHome: spaceSettings.AllowEmptyHome,
+		NoPrivate:      spaceSettings.NoPrivate,
+
+		// CanSetHome:      spaceSettings.CanSetHome,
+		Home: spaceSettings.Home,
+
+		// HasOverwrites:   spaceSettings.HasOverwrites,
+		Overwrites: spaceSettings.Overwrites,
 	}
 }
 
@@ -156,11 +181,18 @@ func newFirespaceFromProgram(config *ConfigFile, program string) *FirespaceConte
 	}
 
 	return &FirespaceContext{
-		CommonSettings: programSettings.CommonSettings,
-		HasOverwrites:  programSettings.HasOverwrites,
-		Executeable:    programSettings.Executeable,
-		PreFlags:       programSettings.PreFlags,
-		Flags:          programSettings.Flags,
+		// CommonSettings: programSettings.CommonSettings,
+		Env:           programSettings.Env,
+		Before:        programSettings.Before,
+		After:         programSettings.After,
+		FirejailFlags: programSettings.FirejailFlags,
+
+		// HasOverwrites:  programSettings.HasOverwrites,
+		Executeable: programSettings.Executeable,
+		PreFlags:    programSettings.PreFlags,
+		Flags:       programSettings.Flags,
+
+		Overwrites: programSettings.Overwrites,
 	}
 }
 
@@ -190,8 +222,16 @@ func newFirespaceFromProgramSpace(config *ConfigFile, program string, space stri
 	}
 
 	return &FirespaceContext{
-		CommonSettings: spaceSettings.CommonSettings,
-		HasOverwrites:  spaceSettings.HasOverwrites,
+		// CommonSettings: spaceSettings.CommonSettings,
+		Env:           spaceSettings.Env,
+		Before:        spaceSettings.Before,
+		After:         spaceSettings.After,
+		FirejailFlags: spaceSettings.FirejailFlags,
+
+		Overwrites: spaceSettings.Overwrites,
+
+		Flags:    spaceSettings.Flags,
+		PreFlags: spaceSettings.PreFlags,
 	}
 
 }
@@ -242,20 +282,21 @@ func (space FirespaceContext) ExecuteTemplates() *FirespaceContext {
 	}
 
 	newSpace := FirespaceContext{
-		CommonSettings: CommonSettings{
-			HasEnv:        HasEnv{Env: executeTemplateOnMap(space.Env, templateContext)},
-			Before:        executeTemplateOnExtendetShellCommand(space.Before, templateContext),
-			After:         executeTemplateOnStringSlice(space.After, templateContext),
-			FirejailFlags: executeTemplateOnStringSlice(space.FirejailFlags, templateContext),
-		},
-		CanControllHome: space.CanControllHome,
-		CanSetHome: CanSetHome{
-			Home: space.CanSetHome.Home,
-		},
-		HasOverwrites: space.HasOverwrites,
-		Executeable:   space.Executeable,
-		PreFlags:      executeTemplateOnStringSlice(space.PreFlags, templateContext),
-		Flags:         executeTemplateOnStringSlice(space.Flags, templateContext),
+		Env:           executeTemplateOnMap(space.Env, templateContext),
+		Before:        executeTemplateOnExtendetShellCommand(space.Before, templateContext),
+		After:         executeTemplateOnStringSlice(space.After, templateContext),
+		FirejailFlags: executeTemplateOnStringSlice(space.FirejailFlags, templateContext),
+
+		AllowEmptyHome: space.AllowEmptyHome,
+		NoPrivate:      space.NoPrivate,
+
+		Home: space.Home,
+
+		Overwrites: space.Overwrites,
+
+		Executeable: space.Executeable,
+		PreFlags:    executeTemplateOnStringSlice(space.PreFlags, templateContext),
+		Flags:       executeTemplateOnStringSlice(space.Flags, templateContext),
 	}
 
 	return &newSpace
@@ -275,6 +316,10 @@ func (space FirespaceContext) Start(cliArgs []string, dry bool) (err error) {
 	defer func() {
 		space.runAfterCommands(dry)
 	}()
+
+	if dry {
+		sugar.Infow("space env ", zap.String("env", fmt.Sprintf("%#v", space.Env)))
+	}
 
 	err = runShell(cmd, dry)
 	if err != nil {

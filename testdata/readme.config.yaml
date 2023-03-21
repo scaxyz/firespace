@@ -1,0 +1,28 @@
+spaces:
+  working:
+    home: "/some/path/working"
+
+  private:
+    home: ""
+    allow_empty_home: true
+    env:
+      PROXY: "socks5://..."
+
+  nospace:
+    home: ""
+    allow_empty_home: true
+    no_private: true
+
+programms:
+  firefox:
+    flags:
+      - "--no-remote"
+      - "https://duckduckgo.com/?q=firejail"
+    spaces:
+      private:
+        overwrites:
+          flags: true
+        flags:
+          - "--no-remote"
+          - "--private-window"
+          - "https://duckduckgo.com/?q=firejail"
