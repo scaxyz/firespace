@@ -1,4 +1,4 @@
-package firespace2
+package firespace
 
 #ConfigFile: {
 	global?: #GlobalSettings

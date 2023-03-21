@@ -1,4 +1,4 @@
-package firespace2
+package firespace
 
 #AbsPath: =~"^/" & #Path
 #Path:    !~"^\\s*$"
