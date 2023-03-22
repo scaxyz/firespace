@@ -1,7 +1,6 @@
 package firespace
 
 import (
-	"fmt"
 	"testing"
 
 	"cuelang.org/go/cue"
@@ -68,7 +67,4 @@ func validateGoStruct(t *testing.T, goValue interface{}, cuePath string) {
 	err = cCodec.Validate(cueConfigFile, goValue)
 	require.NoError(t, err)
 
-	v, err := cCodec.ExtractType(goValue)
-	require.NoError(t, err)
-	fmt.Printf("%#v\n", v)
 }
