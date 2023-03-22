@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_ConfigFileValid(t *testing.T) {
+func Test_ConfigFileCueValidion(t *testing.T) {
 
 	goConfigFile := ConfigFile{}
 
@@ -17,7 +17,7 @@ func Test_ConfigFileValid(t *testing.T) {
 
 }
 
-func Test_GlobalSettings(t *testing.T) {
+func Test_GlobalSettingsCueValidion(t *testing.T) {
 
 	goGlobalSettings := GlobalSettings{}
 
@@ -25,7 +25,7 @@ func Test_GlobalSettings(t *testing.T) {
 
 }
 
-func Test_SpaceSettings(t *testing.T) {
+func Test_SpaceSettingsCueValidion(t *testing.T) {
 
 	goSpaceSettings := SpaceSettings{}
 
@@ -33,7 +33,7 @@ func Test_SpaceSettings(t *testing.T) {
 
 }
 
-func Test_ProgramSettings(t *testing.T) {
+func Test_ProgramSettingsCueValidion(t *testing.T) {
 
 	goProgramSettings := ProgramSettings{}
 
@@ -41,7 +41,7 @@ func Test_ProgramSettings(t *testing.T) {
 
 }
 
-func Test_AdditionalSpaceSettings(t *testing.T) {
+func Test_AdditionalSpaceSettingsCueValidion(t *testing.T) {
 
 	goAdditionalSpaceSettings := AdditionalSpaceSettings{}
 
