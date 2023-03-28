@@ -1,8 +1,8 @@
 package firespace
 
 import (
+	"fmt"
 	"testing"
-	"unsafe"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -90,51 +90,8 @@ func validateGoStruct(t *testing.T, goInterface interface{}, cuePath string) {
 }
 
 func closeStructs(cctx *cue.Context, v cue.Value) cue.Value {
+	closedV := cctx.CompileString(fmt.Sprintf("close({%#v})", v))
 
-	type UnsafeVertex struct {
-		// Parent links to a parent Vertex. This parent should only be used to
-		// access the parent's Label field to find the relative location within a
-		// tree.
-		Parent uintptr
+	return closedV
 
-		// Label is the feature leading to this vertex.
-		Label uint32
-
-		// State:
-		//   eval: nil, BaseValue: nil -- unevaluated
-		//   eval: *,   BaseValue: nil -- evaluating
-		//   eval: *,   BaseValue: *   -- finalized
-		//
-		state uintptr
-		// TODO: move the following status fields to nodeContext.
-
-		// status indicates the evaluation progress of this vertex.
-		status int8
-
-		// isData indicates that this Vertex is to be interepreted as data: pattern
-		// and additional constraints, as well as optional fields, should be
-		// ignored.
-		isData                bool
-		Closed                bool
-		nonMonotonicReject    bool
-		nonMonotonicInsertGen int32
-		nonMonotonicLookupGen int32
-		// ...
-	}
-
-	// Value holds any value, which may be a Boolean, Error, List, Null, Number,
-	// Struct, or String.
-	type UnsafeValue struct {
-		idx uintptr
-		v   *UnsafeVertex
-		// Parent keeps track of the parent if the value corresponding to v.Parent
-		// differs, recursively.
-		parent_ uintptr
-	}
-
-	pV := &v
-	pUV := (*UnsafeValue)(unsafe.Pointer(pV))
-	pUV.v.Closed = true
-
-	return v
 }
