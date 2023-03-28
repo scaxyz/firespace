@@ -15,3 +15,11 @@ eval-config:
 
 install:
 	GOBIN=~/go/bin go install ./cli/firespace/
+
+test-package:
+	go test -timeout 30s github.com/scaxyz/firespace
+
+install-hook:
+	@echo "Installing pre-commit hook..."
+	@cp _git-hooks/pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit

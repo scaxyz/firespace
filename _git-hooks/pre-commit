@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Run the tests
+make test
+
+# Check if the tests passed
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Aborting commit."
+    exit 1
+fi
