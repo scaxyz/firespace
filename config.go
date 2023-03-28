@@ -45,8 +45,10 @@ type GlobalSettings struct {
 }
 
 type SpaceSettings struct {
-	/// CommonSettings `json:",inline"
-	HasEnv        `json:",inline"`
+	// CommonSettings `json:",inline"
+	// HasEnv        `json:",inline"`
+	Env Env `json:"env"`
+
 	Before        []ExtendedShellCommand `json:"before,omitempty"`
 	After         ShellCommands          `json:"after,omitempty"`
 	FirejailFlags []string               `json:"firejail_flags"`

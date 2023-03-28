@@ -3,10 +3,13 @@ package firespace
 #ConfigFile: {
 	global?: #GlobalSettings
 
-	spaces?: [string]: #SpaceSettings
+	spaces: #SpaceMap
 
-	programms?: [string]: #ProgramSettings
+	programms?: #ProgramMap
 }
+
+#ProgramMap: [string]: #ProgramSettings
+#SpaceMap: [string]: #SpaceSettings
 
 #GlobalSettings: {
 	#CommonSettings
@@ -37,7 +40,6 @@ package firespace
 	#HasENV
 	before: [...#ExtendetShellCommand]
 	after: [...#ShellCommand]
-	allow_debugger: bool |*false
 	firejail_flags: [...string]
 }
 
@@ -62,7 +64,7 @@ package firespace
 }
 
 #HasENV: {
-	env?: #ENV | null
+	env: #ENV | *null
 }
 
 #ENV: [string]: string

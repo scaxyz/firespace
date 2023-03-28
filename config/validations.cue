@@ -3,33 +3,26 @@ package firespace
 #AbsPath: =~"^/" & #Path
 #Path:    !~"^\\s*$"
 
-#ConfigFile: {
-	programms: [_name=string]: {
-		executeable: #ProgramSettings.executeable | *_name
-	}
+#ProgramMap: [_name=string]: {
+	executeable: #ProgramSettings.executeable | *_name
 }
 
-#ConfigFile: {
+#SpaceMap: [string]: {
+	allow_empty_home: #SpaceSettings.allow_empty_home
 
-	spaces: [string]: {
-		allow_empty_home: #SpaceSettings.allow_empty_home
+	home: (string) | (#AbsPath)
 
-		home: (string) | (#AbsPath)
+	if allow_empty_home == false {
+		home: #AbsPath
+	}
 
-		if allow_empty_home == false {
-			home: #AbsPath
-		}
-
-		if home != "" {
-			no_private: false
-		}
-
+	if home != "" {
+		no_private: false
 	}
 
 }
 
 #CommonSettings: {
-	_#Flag: =~ "^--"
+	_#Flag: =~"^--"
 	firejail_flags: [..._#Flag]
 }
-
