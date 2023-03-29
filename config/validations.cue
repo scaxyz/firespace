@@ -3,6 +3,9 @@ package firespace
 #AbsPath: =~"^/" & #Path
 #Path:    !~"^\\s*$"
 
+#ProgramSettings: _
+#SpaceSettings:   _
+
 #ProgramMap: [_name=string]: {
 	executeable: #ProgramSettings.executeable | *_name
 }
