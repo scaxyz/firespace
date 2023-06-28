@@ -65,22 +65,22 @@ func validateGoStruct(t *testing.T, goInterface interface{}, cuePath string) {
 
 	cueGoInterface := cCtx.EncodeType(goInterface)
 
-	closedCueGoInterface := cueGoInterface
+	openCueGoInterface := cueGoInterface
 	op, orEntries := cueGoInterface.Expr()
 
 	// if op is | and first entry is nil use the sencond entry
 	if op.String() == "|" {
 		if orEntries[0].Null() == nil {
-			closedCueGoInterface = orEntries[1]
+			openCueGoInterface = orEntries[1]
 		}
 	}
 
 	// close the struct
-	closedCueGoInterface = closeStructs(cCtx, closedCueGoInterface)
+	closedCueGoInterface := closeStructs(cCtx, openCueGoInterface)
 
 	t.Logf("closedCueGoInterface:\n%#v\n", closedCueGoInterface)
 
-	// cross unify to check of not allow or missing entries
+	// cross unify to check for not allow or missing entries
 
 	cueGoUnify := cueLookupValue.Unify(closedCueGoInterface)
 	require.NoErrorf(t, cueGoUnify.Err(), "cue.unify(go): %s", errors.Details(cueGoUnify.Err(), nil))
