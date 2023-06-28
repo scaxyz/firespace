@@ -2,8 +2,8 @@
 (Work)Spaces/Profiles for firejail
 
 ## Usage
-### Example contig
-`config.yaml`
+### Example config
+`config.yaml`  (use `firespace --help` to see the default location)
 ```yaml
 spaces:
   working:
@@ -41,3 +41,26 @@ programms:
 `firespace private firefox` will be executed as => `/usr/bin/firejail --private firefox --no-remote --private-window https://duckduckgo.com/?q=firejail`
 
 `firespace nospace firefox` will be executed as => `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
+
+## Templating
+> TODO: improve readme
+- go templating
+- see `Firespacecontext.go`#TemplateContext
+- e. g. 
+  ```yaml
+  global:
+    env:
+      _proxy_host: "some-server.mullvad.net"
+      _proxy_port: "1080"
+      PROXY: "socks5://{{.Space.Env._proxy_host}}:{{.Space.Env._proxy_port}}"
+      HTTP_PROXY: "socks5://{{.Space.Env._proxy_host}}:{{.Space.Env._proxy_port}}"
+      HTTP_PROXY: "socks5://{{.Space.Env._proxy_host}}:{{.Space.Env._proxy_port}}"
+      
+  ```
+
+## Development
+```bash
+git clone ...
+cd ...
+make install_hook # installed hook will run go tests before commiting #TODO maybe replace with github workflow
+```
