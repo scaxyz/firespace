@@ -1,8 +1,8 @@
 # Firespace
-Workspace/Profiles for firejail
+(Work)Spaces/Profiles for firejail
 
-e.g.  
-
+## Usage
+### Example contig
 `config.yaml`
 ```yaml
 spaces:
@@ -34,9 +34,10 @@ programms:
           - "--private-window"
           - "https://duckduckgo.com/?q=firejail"
 ```
+### Cli usage
 
-`firespace working firefox` => `/usr/bin/firejail --private=/some/path/working firefox --no-remote https://duckduckgo.com/?q=firejail`
+`firespace working firefox` will be executed as => `/usr/bin/firejail --private=/some/path/working firefox --no-remote https://duckduckgo.com/?q=firejail`
 
-`firespace private firefox` => `/usr/bin/firejail --private firefox --no-remote --private-window https://duckduckgo.com/?q=firejail`
+`firespace private firefox` will be executed as => `/usr/bin/firejail --private firefox --no-remote --private-window https://duckduckgo.com/?q=firejail`
 
-`firespace nospace firefox` => `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
+`firespace nospace firefox` will be executed as => `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
