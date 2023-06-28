@@ -42,6 +42,9 @@ programms:
 
 `firespace nospace firefox` will be executed as => `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
 
+## Installation
+`go install github.com/scaxyz/firespace/cli/firespace@latest`
+
 ## Templating
 > TODO: improve readme
 - go templating
