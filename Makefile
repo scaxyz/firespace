@@ -21,5 +21,5 @@ test-package:
 
 install-hook:
 	@echo "Installing pre-commit hook..."
-	@cp _git-hooks/pre-commit .git/hooks/pre-commit
+	@cp .githooks/pre-commit .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
