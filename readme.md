@@ -1,5 +1,17 @@
 # Firespace
-(Work)Spaces/Profiles for firejail
+(Work)Spaces / User-Profiles for firejail
+
+## Why?
+
+Was tired of allways typing the mostly same, but slightly diffrent firejail commands with options not covert by local profiles.
+
+## Features
+
+- Define usage context like "normal", "private", "school", "work"
+- Specify firejail arguments and program arguments to be apply depending on the selected context and/or program you run
+- Config validation
+- Dry run
+
 
 ## Usage
 ### Example config
@@ -36,19 +48,25 @@ programms:
 ```
 ### Cli usage
 
-`firespace working firefox` will be executed as => `/usr/bin/firejail --private=/some/path/working firefox --no-remote https://duckduckgo.com/?q=firejail`
+`firespace working firefox`  
+will be executed as  
+=> `/usr/bin/firejail --private=/some/path/working firefox --no-remote https://duckduckgo.com/?q=firejail`
 
-`firespace private firefox` will be executed as => `/usr/bin/firejail --private firefox --no-remote --private-window https://duckduckgo.com/?q=firejail`
+`firespace private firefox`  
+will be executed as  
+=> `/usr/bin/firejail --private firefox --no-remote --private-window https://duckduckgo.com/?q=firejail`
 
-`firespace nospace firefox` will be executed as => `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
+`firespace nospace firefox`  
+will be executed as => 
+ `/usr/bin/firejail firefox --no-remote https://duckduckgo.com/?q=firejail`
 
 ## Installation
 `go install github.com/scaxyz/firespace/cli/firespace@latest`
 
 ## Templating
 > TODO: improve readme
-- go templating
-- see `Firespacecontext.go`#TemplateContext
+- using golang's [text/template](https://pkg.go.dev/text/template#hdr-Actions)
+- see [TemplateContext](https://pkg.go.dev/github.com/scaxyz/firespace#TemplateContext)
 - e. g. 
   ```yaml
   global:
@@ -63,7 +81,9 @@ programms:
 
 ## Development
 ```bash
-git clone ...
-cd ...
+git clone https://github.com/scaxyz/firespace
+cd firespace
 make install_hook # installed hook will run go tests before commiting #TODO maybe replace with github workflow
 ```
+
+## Config
